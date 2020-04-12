@@ -26,7 +26,7 @@ type Msg struct {
 // GenMiddleFiles read source big file and split data into many small files
 func GenMiddleFiles(conf *config.TopNConfig) error {
 	// init channels
-	msgChan := make(chan *Msg, 512)
+	msgChan := make(chan *Msg, 64)
 	stopChan := make(chan int, conf.Concurrents)
 
 	// start reduce tasks
@@ -73,6 +73,7 @@ func msgMap(filePath string, msgChan chan *Msg, stopChan chan int) error {
 func msgReduce(splitSize int, tmpFileDir string, msgChan chan *Msg, stopChan chan int) error {
 	toWrite := make(map[string]*Msg, 1024)
 	count := 0
+	i := 0
 
 	for {
 		var nextMsg *Msg
@@ -87,20 +88,24 @@ func msgReduce(splitSize int, tmpFileDir string, msgChan chan *Msg, stopChan cha
 				toWrite[hashStr].occurs++
 			}
 			if count >= 1024 {
-				if err := saveMiddleData(splitSize, toWrite); err != nil {
+				if err := saveMiddleData(splitSize, tmpFileDir, toWrite); err != nil {
 					return err
 				}
+				toWrite = make(map[string]*Msg, 1024)
+				count = 0
 			}
-		case <-stopChan:
-			if err := saveMiddleData(splitSize, toWrite); err != nil {
+			continue
+		case i = <-stopChan:
+			if err := saveMiddleData(splitSize, tmpFileDir, toWrite); err != nil {
 				return err
 			}
+			log.Printf("reduce task %d end", i)
 			return nil
 		}
 	}
 }
 
-func saveMiddleData(splitSize int, middleData map[string]*Msg) error {
+func saveMiddleData(splitSize int, tmpFileDir string, middleData map[string]*Msg) error {
 	offsetBytes := make([]byte, 8)
 	occurBytes := make([]byte, 4)
 
@@ -108,12 +113,12 @@ func saveMiddleData(splitSize int, middleData map[string]*Msg) error {
 		// convert offset and occur times to bytes, and added to temp file
 		binary.BigEndian.PutUint64(offsetBytes, uint64(v.offset))
 		binary.BigEndian.PutUint32(occurBytes, uint32(v.occurs))
-		group := append(v.data, offsetBytes...)
+		group := append(v.hash, offsetBytes...)
 		group = append(group, occurBytes...)
 		group = append(group, byte('\n'))
 
 		// open corresponding temp file and write
-		fileName := tmpFilePrefix + strconv.Itoa(int(binary.BigEndian.Uint32(v.hash))%splitSize)
+		fileName := tmpFileDir + tmpFilePrefix + strconv.Itoa(int(binary.BigEndian.Uint32(v.hash))%splitSize)
 		f, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		if err != nil {
 			return err
