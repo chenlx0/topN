@@ -23,9 +23,9 @@ const (
 // and convert to slice and return
 func Aggregate(conf *config.TopNConfig) ([]*Msg, error) {
 	fileNumber := int32(conf.SplitNum)
-	mheap := InitMsgMinHeap()
+	mheap := InitMsgMinHeap(conf.N)
 	var wg sync.WaitGroup
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go func(wgp *sync.WaitGroup) {
 			defer wgp.Done()
@@ -58,7 +58,7 @@ func singleAggregate(tmpFileDir string, curFileNumber *int32, mheap *MsgMinHeap,
 		n := lineSize
 		tmpFilePath := tmpFileDir + tmpFilePrefix + strconv.Itoa(int(newNumber))
 		hashMsgMap := make(map[string]*Msg, 0)
-		f, err := os.Open(tmpFilePath)
+		f, err := os.OpenFile(tmpFilePath, os.O_CREATE|os.O_RDONLY, 0755)
 		if err != nil {
 			return err
 		}
@@ -86,17 +86,8 @@ func singleAggregate(tmpFileDir string, curFileNumber *int32, mheap *MsgMinHeap,
 			}
 		}
 		// aggregate map data to heap
-		aggregateToHeap(hashMsgMap, mheap, maxHeapSize)
-	}
-}
-
-func aggregateToHeap(hashMsgMap map[string]*Msg, mheap *MsgMinHeap, maxHeapSize int) {
-	for _, v := range hashMsgMap {
-		if maxHeapSize > mheap.Len() {
+		for _, v := range hashMsgMap {
 			mheap.Push(v)
-		} else if mheap.Top().occurs < v.occurs {
-			mheap.Push(v)
-			mheap.Pop()
 		}
 	}
 }

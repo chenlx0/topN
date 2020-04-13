@@ -28,7 +28,7 @@ func GenSourceFile(path string, size int64) error {
 	totalSize := int64(0)
 	var tmpBytes []byte
 	for totalSize < size {
-		tmpBytes = append(randomURL(), []byte("\n")...)
+		tmpBytes = append(randomURL(), byte('\n'))
 		n, err := f.Write(tmpBytes)
 		if err != nil {
 			return err

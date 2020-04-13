@@ -7,7 +7,7 @@ import (
 	"github.com/chenlx0/topN/config"
 )
 
-func TestGenSplitFiles(t *testing.T) {
+func TestGenMiddleFiles(t *testing.T) {
 	conf, err := config.InitConfig("../conf.json")
 	if err != nil {
 		t.Errorf("parse config failed: %v", err)

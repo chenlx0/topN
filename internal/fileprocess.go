@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"sync"
 
 	"github.com/chenlx0/topN/config"
 	"github.com/chenlx0/topN/utils"
@@ -15,14 +16,6 @@ const (
 	tmpFilePrefix = "topN-tmp"
 )
 
-// Msg represents each single string
-type Msg struct {
-	data   []byte
-	hash   []byte
-	offset int64
-	occurs int
-}
-
 // GenMiddleFiles read source big file and split data into many small files
 func GenMiddleFiles(conf *config.TopNConfig) error {
 	// init channels
@@ -30,16 +23,24 @@ func GenMiddleFiles(conf *config.TopNConfig) error {
 	stopChan := make(chan int, conf.Concurrents)
 
 	// start reduce tasks
+	var wg sync.WaitGroup
 	for i := 0; i < conf.Concurrents; i++ {
-		go func() {
+		wg.Add(1)
+		go func(wgp *sync.WaitGroup) {
+			defer wgp.Done()
 			if err := msgReduce(conf.SplitNum, conf.TmpFileDir, msgChan, stopChan); err != nil {
 				log.Printf("reduce task error: %v", err)
 			}
-		}()
+		}(&wg)
 	}
 	if err := msgMap(conf.SourceFile, msgChan, stopChan); err != nil {
 		return err
 	}
+	// to notify all reduce tasks exit
+	for i := 0; i < conf.Concurrents; i++ {
+		stopChan <- i
+	}
+	wg.Wait()
 	return nil
 }
 
@@ -60,11 +61,6 @@ func msgMap(filePath string, msgChan chan *Msg, stopChan chan int) error {
 		}
 		curOffset += int64(len(nextMsg.data) + 1) // add 1 to count '\n'
 		msgChan <- nextMsg
-	}
-
-	// to notify all reduce tasks exit
-	for i := 0; i < len(stopChan); i++ {
-		stopChan <- i
 	}
 
 	return nil
@@ -94,7 +90,6 @@ func msgReduce(splitSize int, tmpFileDir string, msgChan chan *Msg, stopChan cha
 				toWrite = make(map[string]*Msg, 1024)
 				count = 0
 			}
-			continue
 		case i = <-stopChan:
 			if err := saveMiddleData(splitSize, tmpFileDir, toWrite); err != nil {
 				return err

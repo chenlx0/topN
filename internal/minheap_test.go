@@ -5,9 +5,9 @@ import (
 )
 
 func TestMinHeap(t *testing.T) {
-	mheap := InitMsgMinHeap()
+	mheap := InitMsgMinHeap(50)
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1000; i++ {
 		mheap.Push(&Msg{occurs: i})
 	}
 

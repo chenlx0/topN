@@ -5,13 +5,15 @@ import (
 	"sync"
 )
 
-// MsgMinHeap implements container/heap interface
+// MsgMinHeap is a customized, size fixed min heap
 // we use it to get Msg with biggest occurs
 type MsgMinHeap struct {
 	mMinHeap *minHeap
 	mux      sync.Mutex
+	maxSize  int
 }
 
+// minHeap implements container/heap interface
 type minHeap []*Msg
 
 // Implement heap.Interface for minHeap
@@ -43,18 +45,23 @@ func (mh *minHeap) Pop() interface{} {
 }
 
 // InitMsgMinHeap init and return MsgMinHeap
-func InitMsgMinHeap() *MsgMinHeap {
+func InitMsgMinHeap(maxSize int) *MsgMinHeap {
 	mhp := &minHeap{&Msg{occurs: 0}}
 	heap.Init(mhp)
 	res := &MsgMinHeap{
 		mMinHeap: mhp,
+		maxSize:  maxSize,
 	}
 	return res
 }
 
 // Push a Msg to our custom heap
+// if heap size is bigger than the maxSize, then pop the element in the top
 func (mmh *MsgMinHeap) Push(m *Msg) {
 	mmh.mux.Lock()
+	if mmh.mMinHeap.Len() >= mmh.maxSize {
+		mmh.mMinHeap.Pop()
+	}
 	mmh.mMinHeap.Push(m)
 	mmh.mux.Unlock()
 }
