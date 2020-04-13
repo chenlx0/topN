@@ -24,7 +24,11 @@ func TestInternal(t *testing.T) {
 		t.Errorf("parse config failed: %v", err)
 	}
 	msgList, _ := Aggregate(conf)
+	err = genMsgData(conf.SourceFile, msgList)
+	if err != nil {
+		t.Errorf("gen msg failed: %v", err)
+	}
 	for _, v := range msgList {
-		fmt.Printf("offset: %d , occurs: %d\n", v.offset, v.occurs)
+		fmt.Printf("string: %s , occurs: %d\n", string(v.data), v.occurs)
 	}
 }

@@ -27,7 +27,7 @@ func (mh minHeap) Swap(i, j int) {
 }
 
 func (mh minHeap) Less(i, j int) bool {
-	return mh[i].occurs > mh[j].occurs
+	return mh[i].occurs < mh[j].occurs
 }
 
 func (mh *minHeap) Push(h interface{}) {
@@ -39,8 +39,8 @@ func (mh *minHeap) Pop() interface{} {
 	if n == 0 {
 		return nil
 	}
-	x := (*mh)[0]
-	*mh = (*mh)[1:]
+	x := (*mh)[n-1]
+	*mh = (*mh)[:n-1]
 	return x
 }
 
@@ -59,17 +59,22 @@ func InitMsgMinHeap(maxSize int) *MsgMinHeap {
 // if heap size is bigger than the maxSize, then pop the element in the top
 func (mmh *MsgMinHeap) Push(m *Msg) {
 	mmh.mux.Lock()
-	if mmh.mMinHeap.Len() >= mmh.maxSize {
-		mmh.mMinHeap.Pop()
+	if mmh.mMinHeap.Len() < mmh.maxSize {
+		heap.Push(mmh.mMinHeap, m)
+	} else {
+		top := (*mmh.mMinHeap)[0]
+		if m.occurs > top.occurs {
+			(*mmh.mMinHeap)[0] = m
+			heap.Fix(mmh.mMinHeap, 0)
+		}
 	}
-	mmh.mMinHeap.Push(m)
 	mmh.mux.Unlock()
 }
 
 // Pop a Msg from our custom heap
 func (mmh *MsgMinHeap) Pop() *Msg {
 	mmh.mux.Lock()
-	res := mmh.mMinHeap.Pop()
+	res := heap.Pop(mmh.mMinHeap)
 	mmh.mux.Unlock()
 	return res.(*Msg)
 }
