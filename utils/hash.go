@@ -13,6 +13,6 @@ const (
 func Hash(data []byte) []byte {
 	res := make([]byte, HashSize)
 	source := md5.Sum(data)
-	copy(res, source[:HashSize-1])
+	copy(res, source[:])
 	return res
 }

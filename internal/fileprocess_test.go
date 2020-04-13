@@ -24,7 +24,7 @@ func TestInternal(t *testing.T) {
 		t.Errorf("parse config failed: %v", err)
 	}
 	msgList, _ := Aggregate(conf)
-	err = genMsgData(conf.SourceFile, msgList)
+	err = GenMsgData(conf.SourceFile, msgList)
 	if err != nil {
 		t.Errorf("gen msg failed: %v", err)
 	}
