@@ -8,7 +8,7 @@ It is easy to find the most frequently occuring line in a file. But it would be 
 
 This program split the large file into many small files, and then aggregate them to find the answers.
 
-### STEP 1: Split files
+### STEP 1: Split file
 
 I use the idea of map reduce here:
 
