@@ -110,7 +110,6 @@ func saveMiddleData(splitSize int, tmpFileDir string, middleData map[string]*Msg
 		binary.BigEndian.PutUint32(occurBytes, uint32(v.occurs))
 		group := append(v.hash, offsetBytes...)
 		group = append(group, occurBytes...)
-		group = append(group, byte('\n'))
 
 		// open corresponding temp file and write
 		fileName := tmpFileDir + tmpFilePrefix + strconv.Itoa(int(binary.BigEndian.Uint32(v.hash))%splitSize)

@@ -46,7 +46,7 @@ func (mh *minHeap) Pop() interface{} {
 
 // InitMsgMinHeap init and return MsgMinHeap
 func InitMsgMinHeap(maxSize int) *MsgMinHeap {
-	mhp := &minHeap{&Msg{occurs: 0}}
+	mhp := &minHeap{}
 	heap.Init(mhp)
 	res := &MsgMinHeap{
 		mMinHeap: mhp,

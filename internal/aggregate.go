@@ -17,6 +17,7 @@ import (
 const (
 	offsetSize = 8
 	occursSize = 4
+	lineSize   = utils.HashSize + offsetSize + occursSize
 )
 
 // Aggregate aggregate all middle file data to a heap,
@@ -46,7 +47,6 @@ func Aggregate(conf *config.TopNConfig) ([]*Msg, error) {
 func singleAggregate(tmpFileDir string, curFileNumber *int32, mheap *MsgMinHeap, maxHeapSize int) error {
 
 	// line size = sizeof(hash value) + sizeof(offset) + sizeof(occurs) + sizeof('\n')
-	lineSize := utils.HashSize + offsetSize + occursSize + 1
 	msgBytes := make([]byte, lineSize)
 	for {
 		newNumber := atomic.AddInt32(curFileNumber, -1)
@@ -65,8 +65,8 @@ func singleAggregate(tmpFileDir string, curFileNumber *int32, mheap *MsgMinHeap,
 		defer f.Close()
 		reader := bufio.NewReader(f)
 		for {
-			n, err = reader.Read(msgBytes)
-			if n < lineSize || err == io.EOF {
+			n, err = io.ReadFull(reader, msgBytes)
+			if err == io.EOF {
 				break
 			}
 			if err != nil {
