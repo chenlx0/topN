@@ -53,9 +53,13 @@ func msgMap(filePath string, msgChan chan *Msg, stopChan chan int) error {
 	curOffset := int64(0)
 	scanner := bufio.NewScanner(f)
 	scanner.Split(bufio.ScanLines)
+	var b []byte
 	for scanner.Scan() {
+		b = scanner.Bytes()
+		toSend := make([]byte, len(b))
+		copy(toSend, b)
 		nextMsg := &Msg{
-			data:   scanner.Bytes(),
+			data:   toSend,
 			offset: curOffset,
 			occurs: 1,
 		}

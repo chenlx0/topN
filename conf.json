@@ -2,6 +2,6 @@
     "sourceFile": "/tmp/urls.txt",
     "tmpFileDir": "/tmp/",
     "splitNum": 128,
-    "concurrents": 1,
+    "concurrents": 16,
     "N": 100
 }
