@@ -12,6 +12,14 @@ type Msg struct {
 	occurs int
 }
 
+func (m *Msg) GetOccurs() int {
+	return m.occurs
+}
+
+func (m *Msg) GetDataStr() string {
+	return string(m.data)
+}
+
 // GenMsgData get line by offset, and sign to Msg
 // but seems my implementation a little ugly
 func GenMsgData(sourceFile string, msgList []*Msg) error {

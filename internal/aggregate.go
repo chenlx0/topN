@@ -55,7 +55,6 @@ func singleAggregate(tmpFileDir string, curFileNumber *int32, mheap *MsgMinHeap,
 			return nil
 		}
 
-		n := lineSize
 		tmpFilePath := tmpFileDir + tmpFilePrefix + strconv.Itoa(int(newNumber))
 		hashMsgMap := make(map[string]*Msg, 0)
 		f, err := os.OpenFile(tmpFilePath, os.O_CREATE|os.O_RDONLY, 0755)
@@ -65,7 +64,7 @@ func singleAggregate(tmpFileDir string, curFileNumber *int32, mheap *MsgMinHeap,
 		defer f.Close()
 		reader := bufio.NewReader(f)
 		for {
-			n, err = io.ReadFull(reader, msgBytes)
+			_, err = io.ReadFull(reader, msgBytes)
 			if err == io.EOF {
 				break
 			}
