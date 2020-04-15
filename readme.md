@@ -38,6 +38,12 @@ After counting occuring times in a binary file, we will push the line with its o
 
 Finally, all items in the heap are what we want. We use the offset to find the origin string in the source file.
 
+## Performance
+
+Test File: 8 million lines random urls, 30G (don't have more disk space)
+
+Get top 100 most frequently occurring lines in 3 minutes on my macbook 2018. And no more than 200MB memory usage.
+
 ## Any better ideas?
 
 We can use data structure like B-Tree to aggregate data in disk, and then we can skip STEP 2. But it needs to write a B-Tree or import third-party packages.
