@@ -80,6 +80,7 @@ func msgReduce(splitSize int, tmpFileDir string, msgChan chan *Msg, stopChan cha
 		select {
 		case nextMsg = <-msgChan:
 			nextMsg.hash = utils.Hash(nextMsg.data)
+			nextMsg.data = nil
 			hashStr := string(nextMsg.hash[:])
 			if _, ok := toWrite[hashStr]; !ok {
 				toWrite[hashStr] = nextMsg

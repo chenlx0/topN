@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-// Msg represents each single string
+// Msg represents each single line
 type Msg struct {
 	data   []byte
 	hash   []byte
