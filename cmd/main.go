@@ -20,7 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := internal.GenMiddleFiles(conf); err != nil {
+	if err = internal.GenMiddleFiles(conf); err != nil {
 		log.Fatal(err)
 	}
 	res, err := internal.Aggregate(conf)

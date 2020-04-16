@@ -46,7 +46,7 @@ func Aggregate(conf *config.TopNConfig) ([]*Msg, error) {
 
 func singleAggregate(tmpFileDir string, curFileNumber *int32, mheap *MsgMinHeap, maxHeapSize int) error {
 
-	// line size = sizeof(hash value) + sizeof(offset) + sizeof(occurs) + sizeof('\n')
+	// line size = sizeof(hash value) + sizeof(offset) + sizeof(occurs)
 	msgBytes := make([]byte, lineSize)
 	for {
 		newNumber := atomic.AddInt32(curFileNumber, -1)
