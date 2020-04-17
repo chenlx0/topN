@@ -19,7 +19,7 @@ const (
 // GenMiddleFiles read source big file and split data into many small files
 func GenMiddleFiles(conf *config.TopNConfig) error {
 	// init channels
-	msgChan := make(chan *Msg, 64)
+	msgChan := make(chan *Msg, 0)
 	stopChan := make(chan int, conf.Concurrents)
 
 	// start reduce tasks
@@ -33,7 +33,7 @@ func GenMiddleFiles(conf *config.TopNConfig) error {
 			}
 		}(&wg)
 	}
-	if err := msgMap(conf.SourceFile, msgChan, stopChan); err != nil {
+	if err := msgMap(conf.SourceFile, msgChan); err != nil {
 		return err
 	}
 	// to notify all reduce tasks exit
@@ -44,7 +44,7 @@ func GenMiddleFiles(conf *config.TopNConfig) error {
 	return nil
 }
 
-func msgMap(filePath string, msgChan chan *Msg, stopChan chan int) error {
+func msgMap(filePath string, msgChan chan *Msg) error {
 	f, err := os.Open(filePath)
 	if err != nil {
 		return err
